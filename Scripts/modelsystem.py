@@ -69,6 +69,7 @@ class ModelSystem:
                     base_demand[ass_class] = mtx[ass_class]
             self.ass_model.assign(tp, base_demand)
             impedance[tp] = self.ass_model.get_impedance()
+        self.imptrans.average_car_impedance(impedance)
         return impedance
 
     def run(self, impedance, is_last_iteration=False):
@@ -200,6 +201,7 @@ class ModelSystem:
                         for ass_class in impedance[tp][mtx_type]:
                             cost_data = impedance[tp][mtx_type][ass_class]
                             mtx[ass_class] = cost_data
+        self.imptrans.average_car_impedance(impedance)
         if is_last_iteration:
             self.ass_model.print_vehicle_kms()
         # print impedance for convergence check
