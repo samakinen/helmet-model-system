@@ -38,6 +38,7 @@ class EmmeAssignmentModel(AssignmentModel, ImpedanceSource):
             "iht": first_scenario_id+4,
         }
         for time_period in self.emme_scenario:
+            self._create_attr(self.emme_scenario[time_period])
             self._calc_road_cost(self.emme_scenario[time_period])
             self._calc_boarding_penalties(self.emme_scenario[time_period])
             self._calc_background_traffic(self.emme_scenario[time_period])
@@ -209,6 +210,53 @@ class EmmeAssignmentModel(AssignmentModel, ImpedanceSource):
         tdist = self.get_matrix("dist", ass_class)
         return gcost - vot_inv *(tcost + self.dist_cost*tdist)
 
+    def create_attribute(self, att, att_type, att_desc, scen_id):
+        """Copy network attribute from scenario to another."""
+        emmebank = self.emme.modeller.emmebank
+        scen = emmebank.scenario(scen_id)
+        self.emme.create_extra_attribute(
+            extra_attribute_type = att_type,
+            extra_attribute_name = att,
+            extra_attribute_description = att_desc,
+            overwrite = True,
+            scenario = scen)
+
+    def sum_link_volumes(self, res_scen_id, attr):
+        """ 
+        Sums and expands link volumes from different scenarios
+        to one result scenario.
+        """
+        emmebank = self.emme.modeller.emmebank
+        # get attr to dictionary from different time periods
+        links_attr = {}
+        for tp in param.emme_scenario:
+            tp_attr = {}
+            scenario = emmebank.scenario(param.emme_scenario[tp])
+            network = scenario.get_network()
+            for link in network.links():
+                extra_attr = param.link_volumes[attr]
+                tp_attr[link.id] = link[extra_attr]
+            links_attr[tp] = tp_attr
+         # save to result network
+        scenario = emmebank.scenario(res_scen_id)
+        network = scenario.get_network()
+        for tp in param.emme_scenario:
+            for link in network.links():
+                if link.id in links_attr[tp]:
+                    add_attr = links_attr[tp][link.id]
+                    expansion_factor = param.volume_factors[attr][tp]
+                    extra_attr = param.link_volumes[attr]
+                    link[extra_attr] = link[extra_attr] + add_attr * expansion_factor
+        scenario.publish_network(network)
+    
+    def _create_attr(self, scen_id):
+        """Create attributes needed in assignment."""
+        emmebank = self.emme.modeller.emmebank
+        scen = emmebank.scenario(scen_id)
+        # defined in params
+        for attr in param.emme_attributes.keys():
+            self.create_attribute(attr, param.emme_attributes[attr], "model calc", scen)
+
     def _calc_background_traffic(self, scen_id):
         """Calculate background traffic (buses)."""
         emmebank = self.emme.modeller.emmebank
@@ -220,7 +268,7 @@ class EmmeAssignmentModel(AssignmentModel, ImpedanceSource):
                 "transit_line": "all",
             },
             "expression": "0",
-            "result": "@vm1",
+            "result": "@freq",
             "aggregation": None,
         }, scen)
         # Calculate number of line departures per hour
@@ -230,7 +278,7 @@ class EmmeAssignmentModel(AssignmentModel, ImpedanceSource):
                 "transit_line": "hdw=1,900",
             },
             "expression": "60.0/hdw",
-            "result": "@vm1",
+            "result": "@freq",
             "aggregation": None,
         }, scen)
         # Reset @vm to zero
@@ -240,7 +288,7 @@ class EmmeAssignmentModel(AssignmentModel, ImpedanceSource):
                 "link": "all",
             },
             "expression": "0",
-            "result": "@vm",
+            "result": "@bus",
             "aggregation": None,
         }, scen)
         # Calculate number of link departures per hour
@@ -250,8 +298,8 @@ class EmmeAssignmentModel(AssignmentModel, ImpedanceSource):
                 "link": "all",
                 "transit_line": "all"
             },
-            "expression": "@vm1",
-            "result": "@vm",
+            "expression": "@freq",
+            "result": "@bus",
             "aggregation": "+",
         }, scen)
         # Reset ul3 to zero
@@ -279,36 +327,14 @@ class EmmeAssignmentModel(AssignmentModel, ImpedanceSource):
         """Calculate road charges and driving costs for one scenario."""
         self.emme.logger.info("Calculates road charges for scenario " + str(scen_id))
         scenario = self.emme.modeller.emmebank.scenario(scen_id)
-        netw_specs = [{
-            # Link cost [eur]
-            "type": "NETWORK_CALCULATION",
-            "selections": {
-                "link": "all",
-            },
-            "expression": "@hinta*length",
-            "result": "@ruma",
-            "aggregation": None,
-        }, {
-            # Driving cost [eur]
-            "type": "NETWORK_CALCULATION",
-            "selections": {
-                "link": "all",
-            },
-            "expression": str(self.dist_cost) + "*length",
-            "result": "@rumpi",
-            "aggregation": None,
-        }, {
-            # Total cost [eur]
-            "type": "NETWORK_CALCULATION",
-            "selections": {
-                "link": "all",
-            },
-            "expression": "@ruma+@rumpi",
-            "result": "@rumsi",
-            "aggregation": None,
-        }]
-        self.emme.network_calc(netw_specs, scenario)
-
+        network = scenario.get_network()
+        for link in network.links():
+            ruma = link.length * link["@hinta"]
+            rumpi = self.dist_cost * link.length
+            link['@ruma'] = ruma
+            link["@rumsi"] = (ruma + rumpi)
+        scenario.publish_network(network)
+        
     def print_vehicle_kms(self):
         freight_classes = ["van", "truck", "trailer_truck"]
         vdfs = [1, 2, 3, 4, 5]

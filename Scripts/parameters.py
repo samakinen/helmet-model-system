@@ -168,14 +168,28 @@ aux_modes = [
     'a',
     's',
 ]
+# Link attributes that are
+# initialized by helmet-model-system 
+emme_attributes = {
+    "@bus": "LINK",
+    "@freq": "TRANSIT_LINE",
+    "@rumsi": "LINK",
+    "@ruma": "LINK",
+    "@wait_time_dev": "TRANSIT_SEGMENT",
+    "@car_work": "LINK",
+    "@car_leisure": "LINK",
+    "@trailer_truck": "LINK",
+    "@truck": "LINK",
+    "@van": "LINK",    
+}
 transit_assignment_modes = transit_modes + aux_modes
 # Link attribute for volumes
 link_volumes = {
-    "car_work": None,
-    "car_leisure": None,
-    "trailer_truck": "@yhd",
-    "truck": "@ka",
-    "van": "@pa",
+    "car_work": "@car_work",
+    "car_leisure": "@car_leisure",
+    "trailer_truck": "@trailer_truck",
+    "truck": "@truck",
+    "van": "@van",
 }
 # Factors for 24-h expansion of volumes
 # TODO Update
@@ -196,29 +210,29 @@ volume_factors = {
         "iht": 1. / 0.38,
     },
     "transit": {
-        "aht": 1. / 0.47,
-        "pt": 1. / 0.09,
-        "iht": 1. / 0.38,
+        "aht": 1. / 0.48,
+        "pt": 1. / 0.11,
+        "iht": 1. / 0.46,
     },
     "bike": {
-        "aht": 1. / 0.47,
-        "pt": 1. / 0.09,
+        "aht": 1. / 0.61,
+        "pt": 1. / 0.10,
         "iht": 1. / 0.38,
     },
     "trailer_truck": {
-        "aht": 1. / 0.47,
-        "pt": 1. / 0.09,
-        "iht": 1. / 0.38,
+        "aht": 0.066,
+        "pt": 0.07,
+        "iht": 0.066,
     },
     "truck": {
-        "aht": 1. / 0.47,
-        "pt": 1. / 0.09,
-        "iht": 1. / 0.38,
+         "aht": 0.066,
+        "pt": 0.07,
+        "iht": 0.066,
     },
     "van": {
-        "aht": 1. / 0.47,
-        "pt": 1. / 0.09,
-        "iht": 1. / 0.38,
+        "aht": 0.054,
+        "pt": 0.07,
+        "iht": 0.044,
     },
 }
 # Emme matrix IDs

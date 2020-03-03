@@ -36,7 +36,7 @@ def main(config, logger):
         logger.info("Initializing MockAssignmentModel..")
         mock_result_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "Matrices", config.SCENARIO_NAME)
         ass_model = MockAssignmentModel(MatrixData(mock_result_path))
-    model = ModelSystem(config.DATA_PATH, "2016", "base", ass_model, name)
+    model = ModelSystem(config.DATA_PATH, "2016_full", "base_full", ass_model, name)
     log_extra["status"]["results"] = model.mode_share
 
     # Run traffic assignment simulation for N iterations, on last iteration model-system will save the results

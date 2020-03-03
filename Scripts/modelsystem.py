@@ -205,7 +205,11 @@ class ModelSystem:
 
         if is_last_iteration:
             self.ass_model.print_vehicle_kms()
-
+            # expand volumes to 24h to assignment network
+            res_scen_id = 22
+            for attr in parameters.link_volumes:
+                self.ass_model.sum_link_volumes(res_scen_id, attr)       
+                 
         # Reset time-period specific demand matrices (DTM), and empty result buffer
         self.dtm.init_demand()
         resultdata.flush()
