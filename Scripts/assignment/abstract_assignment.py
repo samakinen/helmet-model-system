@@ -43,7 +43,7 @@ class ImpedanceSource:
         pass
 
     @abstractmethod
-    def get_matrices(self, mtx_type, time_period=None):
+    def get_emmebank_matrices(self, mtx_type, time_period=None):
         pass
 
     @abstractmethod
@@ -55,5 +55,5 @@ class ImpedanceSource:
         pass
 
     @abstractmethod
-    def print_vehicle_kms(self):
+    def print_vehicle_kms(self, resultdatawriter):
         pass

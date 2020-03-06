@@ -2,10 +2,13 @@
     "LOG_LEVEL": "INFO",
     "LOG_FORMAT": "TEXT",
     "USE_EMME": true,
-    "SCENARIO_NAME": "2016_test",
-    "EMME_PROJECT_PATH": "C:\\Users\\FIAS34036\\helmet\\test-system\\HELMET40.emp",
+
+    "SCENARIO_NAME": "helmet",
+    "RESULTS_PATH": "",
+    "EMME_PROJECT_PATH": "",
     "FIRST_SCENARIO_ID": 19,
-    "DATA_PATH": "2016_test",
-    "ITERATION_COUNT": 1,
-    "USE_FIXED_TRANSIT_COST": true
+    "BASELINE_DATA_PATH": "",
+    "FORECAST_DATA_PATH": "",
+    "ITERATION_COUNT": 5,
+    "USE_FIXED_TRANSIT_COST": false
 }
