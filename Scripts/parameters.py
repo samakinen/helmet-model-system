@@ -168,8 +168,8 @@ aux_modes = [
     'a',
     's',
 ]
-# Link attributes that are
-# initialized by helmet-model-system 
+# Link attributes initialized 
+# in helmet-model-system 
 emme_attributes = {
     "@bus": "LINK",
     "@freq": "TRANSIT_LINE",
@@ -220,19 +220,19 @@ volume_factors = {
         "iht": 1. / 0.38,
     },
     "trailer_truck": {
-        "aht": 0.066,
-        "pt": 0.07,
-        "iht": 0.066,
+        "aht": 1 / 0.066,
+        "pt": 1 / 0.07,
+        "iht": 1 / 0.066,
     },
     "truck": {
-         "aht": 0.066,
-        "pt": 0.07,
-        "iht": 0.066,
+         "aht": 1 / 0.066,
+        "pt": 1 / 0.07,
+        "iht": 1 / 0.066,
     },
     "van": {
-        "aht": 0.054,
-        "pt": 0.07,
-        "iht": 0.044,
+        "aht": 1 / 0.054,
+        "pt": 1 / 0.07,
+        "iht": 1 / 0.044,
     },
 }
 # Emme matrix IDs

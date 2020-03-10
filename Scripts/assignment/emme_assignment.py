@@ -196,47 +196,19 @@ class EmmeAssignmentModel(AssignmentModel, ImpedanceSource):
         return gcost - vot_inv *(tcost + self.dist_cost*tdist)
 
     def create_attribute(self, att, att_type, att_desc, scen_id):
-        """Copy network attribute from scenario to another."""
-        emmebank = self.emme.modeller.emmebank
+        """Create attribute to scenario."""
+        emmebank = self.emme_project.modeller.emmebank
         scen = emmebank.scenario(scen_id)
-        self.emme.create_extra_attribute(
+        self.emme_project.create_extra_attribute(
             extra_attribute_type = att_type,
             extra_attribute_name = att,
             extra_attribute_description = att_desc,
             overwrite = True,
             scenario = scen)
-
-    def sum_link_volumes(self, res_scen_id, attr):
-        """ 
-        Sums and expands link volumes from different scenarios
-        to one result scenario.
-        """
-        emmebank = self.emme.modeller.emmebank
-        # get attr to dictionary from different time periods
-        links_attr = {}
-        for tp in param.emme_scenario:
-            tp_attr = {}
-            scenario = emmebank.scenario(param.emme_scenario[tp])
-            network = scenario.get_network()
-            for link in network.links():
-                extra_attr = param.link_volumes[attr]
-                tp_attr[link.id] = link[extra_attr]
-            links_attr[tp] = tp_attr
-         # save to result network
-        scenario = emmebank.scenario(res_scen_id)
-        network = scenario.get_network()
-        for tp in param.emme_scenario:
-            for link in network.links():
-                if link.id in links_attr[tp]:
-                    add_attr = links_attr[tp][link.id]
-                    expansion_factor = param.volume_factors[attr][tp]
-                    extra_attr = param.link_volumes[attr]
-                    link[extra_attr] = link[extra_attr] + add_attr * expansion_factor
-        scenario.publish_network(network)
     
     def _create_attr(self, scen_id):
         """Create attributes needed in assignment."""
-        emmebank = self.emme.modeller.emmebank
+        emmebank = self.emme_project.modeller.emmebank
         scen = emmebank.scenario(scen_id)
         # defined in params
         for attr in param.emme_attributes.keys():
@@ -310,8 +282,8 @@ class EmmeAssignmentModel(AssignmentModel, ImpedanceSource):
 
     def _calc_road_cost(self, scen_id):
         """Calculate road charges and driving costs for one scenario."""
-        self.emme.logger.info("Calculates road charges for scenario " + str(scen_id))
-        scenario = self.emme.modeller.emmebank.scenario(scen_id)
+        self.emme_project.logger.info("Calculates road charges for scenario " + str(scen_id))
+        scenario = self.emme_project.modeller.emmebank.scenario(scen_id)
         network = scenario.get_network()
         for link in network.links():
             ruma = link.length * link["@hinta"]
@@ -320,7 +292,7 @@ class EmmeAssignmentModel(AssignmentModel, ImpedanceSource):
             link["@rumsi"] = (ruma + rumpi)
         scenario.publish_network(network)
         
-    def print_vehicle_kms(self):
+    def print_vehicle_kms(self, resultdata):
         freight_classes = ["van", "truck", "trailer_truck"]
         vdfs = [1, 2, 3, 4, 5]
         transit_modes = {
