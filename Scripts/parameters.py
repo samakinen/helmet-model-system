@@ -220,19 +220,19 @@ volume_factors = {
         "iht": 1. / 0.38,
     },
     "trailer_truck": {
-        "aht": 1 / 0.066,
-        "pt": 1 / 0.07,
-        "iht": 1 / 0.066,
+        "aht": 1 / 0.3, # PAIVITA RASKAS
+        "pt": 1 / 0.1,
+        "iht": 1 / 0.3,
     },
     "truck": {
-         "aht": 1 / 0.066,
-        "pt": 1 / 0.07,
-        "iht": 1 / 0.066,
+         "aht": 1 / 0.3,
+        "pt": 1 / 0.1,
+        "iht": 1 / 0.3,
     },
     "van": {
-        "aht": 1 / 0.054,
-        "pt": 1 / 0.07,
-        "iht": 1 / 0.044,
+        "aht": 1 / 0.3,
+        "pt": 1 / 0.1,
+        "iht": 1 / 0.3,
     },
 }
 # Emme matrix IDs

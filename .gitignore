@@ -9,6 +9,8 @@
 *.pdf
 *.emlk
 *.emv
+*.emw
+*.ipynb
 *.eml
 *.emu
 *.ema
