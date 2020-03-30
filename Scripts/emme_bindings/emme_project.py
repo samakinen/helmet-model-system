@@ -44,6 +44,8 @@ class EmmeProject:
         # sum day volumes from time period scenarios
         self.create_extra_attribute = self.modeller.tool(
             "inro.emme.data.extra_attribute.create_extra_attribute")
+        self.import_attr = self.modeller.tool(
+            "inro.emme.data.extra_attribute.import_extra_attributes")
     
     def write(self, message):
         """Write to logbook."""

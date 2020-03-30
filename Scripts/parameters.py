@@ -180,7 +180,7 @@ emme_attributes = {
     "@car_leisure": "LINK",
     "@trailer_truck": "LINK",
     "@truck": "LINK",
-    "@van": "LINK",    
+    "@van": "LINK", 
 }
 transit_assignment_modes = transit_modes + aux_modes
 # Link attribute for volumes
@@ -189,8 +189,8 @@ link_volumes = {
     "car_leisure": "@car_leisure",
     "trailer_truck": "@trailer_truck",
     "truck": "@truck",
-    "van": "@van",
-}
+    "van": "@van"
+    }
 # Factors for 24-h expansion of volumes
 # TODO Update
 volume_factors = {
@@ -214,13 +214,33 @@ volume_factors = {
         "pt": 1. / 0.11,
         "iht": 1. / 0.46,
     },
+    "transit_work": {
+        "aht": 1. / 0.48,
+        "pt": 1. / 0.11,
+        "iht": 1. / 0.46,
+    },
+    "transit_leisure": {
+        "aht": 1. / 0.48,
+        "pt": 1. / 0.11,
+        "iht": 1. / 0.46,
+    },
     "bike": {
         "aht": 1. / 0.61,
         "pt": 1. / 0.10,
         "iht": 1. / 0.38,
     },
+    "bike_work": {
+        "aht": 1. / 0.61,
+        "pt": 1. / 0.10,
+        "iht": 1. / 0.38,
+    },
+    "bike_leisure": {
+        "aht": 1. / 0.61,
+        "pt": 1. / 0.10,
+        "iht": 1. / 0.38,
+    },
     "trailer_truck": {
-        "aht": 1 / 0.3, # PAIVITA RASKAS
+        "aht": 1 / 0.3,
         "pt": 1 / 0.1,
         "iht": 1 / 0.3,
     },
@@ -230,6 +250,11 @@ volume_factors = {
         "iht": 1 / 0.3,
     },
     "van": {
+        "aht": 1 / 0.3,
+        "pt": 1 / 0.1,
+        "iht": 1 / 0.3,
+    },
+    "bus": {
         "aht": 1 / 0.3,
         "pt": 1 / 0.1,
         "iht": 1 / 0.3,

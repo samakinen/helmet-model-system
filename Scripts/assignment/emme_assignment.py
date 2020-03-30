@@ -275,7 +275,7 @@ class EmmeAssignmentModel(AssignmentModel, ImpedanceSource):
             "selections": {
                 "link": "vdf=1,5",
             },
-            "expression": "@vm",
+            "expression": "@bus",
             "result": param.background_traffic,
             "aggregation": None,
         }, scen)
