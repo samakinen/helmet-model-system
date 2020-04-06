@@ -25,6 +25,8 @@ class EmmeProject:
         self.path = os.path.dirname(self.modeller.emmebank.path)
         self.create_matrix = self.modeller.tool(
             "inro.emme.data.matrix.create_matrix")
+        self.delete_matrix = self.modeller.tool(
+            "inro.emme.data.matrix.delete_matrix")
         self.network_calc = self.modeller.tool(
             "inro.emme.network_calculation.network_calculator")
         self.process_functions = self.modeller.tool(
@@ -41,6 +43,10 @@ class EmmeProject:
             "inro.emme.transit_assignment.congested_transit_assignment")
         self.matrix_results = self.modeller.tool(
             "inro.emme.transit_assignment.extended.matrix_results")
+        self.path_analysis = self.modeller.tool(
+            "inro.emme.transit_assignment.extended.path_based_analysis")
+        self.strategy_analysis = self.modeller.tool(
+            "inro.emme.transit_assignment.extended.strategy_based_analysis")
         # sum day volumes from time period scenarios
         self.create_extra_attribute = self.modeller.tool(
             "inro.emme.data.extra_attribute.create_extra_attribute")

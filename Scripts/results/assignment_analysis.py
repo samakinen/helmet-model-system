@@ -13,21 +13,33 @@ def assign_volumes(emme_project, resultmatrices, first_scenario_id):
     """
     Assing volumes for last iteration round.
     """
-    ass_model = EmmeAssignmentModel(emme_project, first_scenario_id = first_scenario_id)
     ass_classes = resultmatrices.list_matrices("demand", "aht")
+    while True:
+        try:
+            no_matrices = len(scenarios.keys()) * len(ass_classes)
+            print "Reads in {} matrices.".format(no_matrices)
+            mtx_id = int(input("Matrix ids to hold demand matrices:"))
+            break
+        except ValueError:
+            print("Value should be a whole number.") 
     for tp in scenarios:
-            print "Assigning period " + tp
-            with resultmatrices.open("demand", tp) as mtx:
-                base_demand = {ass_class: mtx[ass_class] for ass_class in ass_classes}
-            ass_model.assign(tp, base_demand,  is_last_iteration = True) 
+        emme_mtx = {}
+        for ass_class in parameters.emme_demand_mtx: #self.ass_classes
+            emme_mtx[ass_class] = {
+                "id": "mf" + str(mtx_id), 
+                "description": ass_class + "_demand_" + tp}
+            mtx_id = mtx_id + 1
+        print "Assigning period " + tp
+        ass_model = EmmeAssignmentModel(
+            emme_context = emme_project, 
+            first_scenario_id = first_scenario_id,
+            demand_mtx=emme_mtx
+            )
+        with resultmatrices.open("demand", tp) as mtx:
+            base_demand = {ass_class: mtx[ass_class] for ass_class in ass_classes}
+        ass_model.assign(tp, base_demand,  is_last_iteration = True) 
 
-def calc_link_day(emme_project, first_scenario_id, attr):
-    result_scenario_id = first_scenario_id + 1
-    scenarios = {
-        "aht": first_scenario_id + 2,
-        "pt": first_scenario_id + 3,
-        "iht": first_scenario_id + 4
-        }
+def calc_link_day(emme_project, scenarios, result_scenario_id, attr):
     """ 
     Sums and expands link volumes from different scenarios
     to one result scenario.
@@ -45,7 +57,6 @@ def calc_link_day(emme_project, first_scenario_id, attr):
         links_attr[tp] = tp_attr
     # get result network
     scenario = emmebank.scenario(result_scenario_id)
-    network = scenario.get_network()
     # create attr to save volume
     extra_attr_day = str(parameters.link_volumes[attr])
     emme_project.create_extra_attribute(
@@ -54,7 +65,6 @@ def calc_link_day(emme_project, first_scenario_id, attr):
             extra_attribute_description = "link day volumes",
             overwrite = True,
             scenario = scenario)
-    scenario.publish_network(network)
     network = scenario.get_network()
     # save link volumes to result network
     for link in network.links():
@@ -67,18 +77,12 @@ def calc_link_day(emme_project, first_scenario_id, attr):
         link[extra_attr_day] = day_add_attr
     scenario.publish_network(network)
 
-def calc_segment_day(emme_project, first_scenario_id, attr):
-    result_scenario_id = first_scenario_id + 1
-    scenarios = {
-        "aht": first_scenario_id + 2,
-        "pt": first_scenario_id + 3,
-        "iht": first_scenario_id + 4
-        }
-    extra_attr = "@" + attr
+def calc_segment_link_day(emme_project, scenarios, result_scenario_id):
     """ 
-    Sums and expands link volumes from different scenarios
-    to one result scenario.
+    Sums and expands segment volumes to links from different scenario.
     """
+    attr = "transit"
+    extra_attr = "@" + attr
     emmebank = emme_project.modeller.emmebank
     # get attr from different time periods to dictionary
     links_attr = {}
@@ -102,7 +106,6 @@ def calc_segment_day(emme_project, first_scenario_id, attr):
         scenario.publish_network(network)
     # get result network
     scenario = emmebank.scenario(result_scenario_id)
-    network = scenario.get_network()
     # create attr to save volume
     emme_project.create_extra_attribute(
             extra_attribute_type = "LINK",
@@ -110,7 +113,6 @@ def calc_segment_day(emme_project, first_scenario_id, attr):
             extra_attribute_description = "transit day volumes",
             overwrite = True,
             scenario = scenario)
-    scenario.publish_network(network)
     network = scenario.get_network()
     # save link volumes to result network
     for link in network.links():
@@ -121,6 +123,97 @@ def calc_segment_day(emme_project, first_scenario_id, attr):
                 add_attr = links_attr[tp][link.id]
                 day_add_attr += add_attr * expansion_factor
         link[extra_attr] = day_add_attr
+    scenario.publish_network(network)
+
+def calc_segment_node_day(emme_project, scenarios, result_scenario_id):
+    """ 
+    Sums and expands node volumes to links from different scenario.
+    """
+    attr = "transit"
+    extra_attr = "@" + attr + "_node"
+    emmebank = emme_project.modeller.emmebank
+    # get attr from different time periods to dictionary
+    nodes_attr = {}
+    for tp in scenarios:
+        tp_attr = {}
+        scenario = emmebank.scenario(scenarios[tp])
+        emme_project.create_extra_attribute(
+            extra_attribute_type = "NODE",
+            extra_attribute_name = extra_attr,
+            extra_attribute_description = "transit boardings",
+            overwrite = True,
+            scenario = scenario)
+        network = scenario.get_network()
+        for node in network.nodes():
+            board_segment = 0
+            for segment in node.outgoing_segments():
+                board_segment += segment.transit_boardings
+            node[extra_attr] = board_segment
+            tp_attr[node.id] = board_segment
+        nodes_attr[tp] = tp_attr
+        scenario.publish_network(network)
+    # get result network
+    scenario = emmebank.scenario(result_scenario_id)
+    # create attr to save volume
+    emme_project.create_extra_attribute(
+            extra_attribute_type = "NODE",
+            extra_attribute_name = extra_attr,
+            extra_attribute_description = "transit boardings 24h",
+            overwrite = True,
+            scenario = scenario)
+    network = scenario.get_network()
+    # save link volumes to result network
+    for node in network.nodes():
+        day_add_attr = 0
+        for tp in scenarios:
+             if node.id in nodes_attr[tp]:
+                expansion_factor = parameters.volume_factors[attr][tp]
+                add_attr = nodes_attr[tp][node.id]
+                day_add_attr += add_attr * expansion_factor
+        node[extra_attr] = day_add_attr
+    scenario.publish_network(network)
+
+def calc_segment_day(emme_project, scenarios, result_scenario_id):
+    """ 
+    Sums and expands node volumes to links from different scenario.
+    """
+    attr = "transit"
+    extra_attr = "@" + attr + "_segment"
+    emmebank = emme_project.modeller.emmebank
+    # get attr from different time periods to dictionary
+    segments_attr = {}
+    for tp in scenarios:
+        tp_attr = {}
+        scenario = emmebank.scenario(scenarios[tp])
+        emme_project.create_extra_attribute(
+            extra_attribute_type = "TRANSIT_SEGMENT",
+            extra_attribute_name = extra_attr,
+            extra_attribute_description = "transit boardings",
+            overwrite = True,
+            scenario = scenario)
+        network = scenario.get_network()
+        for segment in network.transit_segments():
+            tp_attr[segment.id] = segment.transit_boardings
+        segments_attr[tp] = tp_attr
+    # get result network
+    scenario = emmebank.scenario(result_scenario_id)
+    # create attr to save volume
+    emme_project.create_extra_attribute(
+            extra_attribute_type = "TRANSIT_SEGMENT",
+            extra_attribute_name = extra_attr,
+            extra_attribute_description = "transit boardings 24h",
+            overwrite = True,
+            scenario = scenario)
+    network = scenario.get_network()
+    # save link volumes to result network
+    for segment in network.transit_segments():
+        day_add_attr = 0
+        for tp in scenarios:
+             if segment.id in segments_attr[tp]:
+                expansion_factor = parameters.volume_factors[attr][tp]
+                add_attr = segments_attr[tp][segment.id]
+                day_add_attr += add_attr * expansion_factor
+        segment[extra_attr] = day_add_attr
     scenario.publish_network(network)
 
 def import_count_data(emme_project, parameters_path, first_scenario_id):

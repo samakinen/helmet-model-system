@@ -261,37 +261,37 @@ volume_factors = {
     },
 }
 # Emme matrix IDs
-emme_mtx = {
-    "demand": {
-        "car_work": {
-            "id": "mf1",
-            "description": "car work demand",
-        },
-        "car_leisure": {
-            "id": "mf2",
-            "description": "car leisure demand",
-        },
-        "transit":  {
-            "id":"mf4",
-            "description": "transit demand",
-        },
-        "bike":  {
-            "id":"mf5",
-            "description": "bicyclist demand",
-        },
-        "trailer_truck": {
-            "id": "mf7",
-            "description": "trailer truck demand",
-        },
-        "truck":  {
-            "id":"mf8",
-            "description": "truck demand",
-        },
-        "van":  {
-            "id":"mf9",
-            "description": "van demand",
-        },
+emme_demand_mtx = {
+    "car_work": {
+        "id": "mf1",
+        "description": "car work demand",
     },
+    "car_leisure": {
+        "id": "mf2",
+        "description": "car leisure demand",
+    },
+    "transit":  {
+        "id":"mf4",
+        "description": "transit demand",
+    },
+    "bike":  {
+        "id":"mf5",
+        "description": "bicyclist demand",
+    },
+    "trailer_truck": {
+        "id": "mf7",
+        "description": "trailer truck demand",
+    },
+    "truck":  {
+        "id":"mf8",
+        "description": "truck demand",
+    },
+    "van":  {
+        "id":"mf9",
+        "description": "van demand",
+    },
+}
+emme_result_mtx = {
     "time": {
         "car_work": {
             "id": "mf11",
