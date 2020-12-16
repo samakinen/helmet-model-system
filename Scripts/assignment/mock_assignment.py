@@ -1,7 +1,7 @@
 import logging
 
 import parameters.assignment as param
-from abstract_assignment import AssignmentModel
+from assignment.abstract_assignment import AssignmentModel
 
 
 class MockAssignmentModel(AssignmentModel):

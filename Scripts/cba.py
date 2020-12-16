@@ -47,17 +47,17 @@ def run_cost_benefit_analysis(scenario_0, scenario_1, year, results_directory, w
         revenues["car"][tp] = 0
         for ass_mode in param.assignment_modes:
             revenues["car"][tp] += calc_revenue(ve0[ass_mode], ve1[ass_mode])
-        print "Revenues " + tp + " calculated"
+        print("Revenues " + tp + " calculated")
         for transport_class in gains:
             gains[transport_class][tp] = calc_gains(
                 ve0[transport_class], ve1[transport_class])
-        print "Gains " + tp + " calculated"
+        print("Gains " + tp + " calculated")
     if year == 1:
         write_results_1(wb, mile_diff, transit_mile_diff, revenues, gains)
     elif year == 2:
         write_results_2(wb, mile_diff, transit_mile_diff, revenues, gains)
     else:
-        print "Evaluation year must be either 1 or 2"
+        print("Evaluation year must be either 1 or 2")
     
 
 
@@ -72,6 +72,7 @@ def read_scenario(path, time_period):
     for transport_class in param.transport_classes:
         matrices[transport_class] = {}
         for mtx_type in files:
+            mtx_label = ""
             if mtx_type != "demand":
                 mtx_label = transport_class.split('_')[0]
                 if mtx_label == "bike":
@@ -95,7 +96,7 @@ def read_scenario(path, time_period):
                         matrices[transport_class][mtx_type] = matrices[transport_class][mtx_type] / 30
     for mtx_type in files:
         files[mtx_type].close()
-    print "Files read"
+    print("Files read")
     return matrices    
 
 
@@ -164,25 +165,25 @@ def read_transit_miles(results_directory, scenario_name):
 
 def write_results_1(wb, miles, transit_miles, revenues, gains):
     """Write results for year 1"""
-    ws = wb.get_sheet_by_name("ha_tyo")
+    ws = wb["ha_tyo"]
     write_gains_1(ws, gains["car_work"])
-    ws = wb.get_sheet_by_name("ha_muu")
+    ws = wb["ha_muu"]
     write_gains_1(ws, gains["car_leisure"])
-    ws = wb.get_sheet_by_name("jl_tyo")
+    ws = wb["jl_tyo"]
     write_gains_1(ws, gains["transit_work"])
-    ws = wb.get_sheet_by_name("jl_muu")
+    ws = wb["jl_muu"]
     write_gains_1(ws, gains["transit_leisure"])
-    ws = wb.get_sheet_by_name("pp_tyo")
+    ws = wb["pp_tyo"]
     write_gains_1(ws, gains["bike_work"])
-    ws = wb.get_sheet_by_name("pp_muu")
+    ws = wb["pp_muu"]
     write_gains_1(ws, gains["bike_leisure"])
-    ws = wb.get_sheet_by_name("ka")
+    ws = wb["ka"]
     write_gains_1(ws, gains["truck"])
-    ws = wb.get_sheet_by_name("yhd")
+    ws = wb["yhd"]
     write_gains_1(ws, gains["trailer_truck"])
-    ws = wb.get_sheet_by_name("pa")
+    ws = wb["pa"]
     write_gains_1(ws, gains["van"])
-    ws = wb.get_sheet_by_name("Ulkoisvaikutukset")
+    ws = wb["Ulkoisvaikutukset"]
     ws["I19"] = miles["car"][1]
     ws["J19"] = miles["car"][2]
     ws["K19"] = miles["car"][3]
@@ -203,7 +204,7 @@ def write_results_1(wb, miles, transit_miles, revenues, gains):
     ws["K22"] = miles["trailer_truck"][3]
     ws["L22"] = miles["trailer_truck"][4]
     ws["M22"] = miles["trailer_truck"][5]
-    ws = wb.get_sheet_by_name("Tuottajahyodyt")
+    ws = wb["Tuottajahyodyt"]
     ws["S8"] = transit_miles["dist"]["bus"]
     ws["S9"] = transit_miles["dist"]["trunk"]
     ws["S10"] = transit_miles["dist"]["tram"]
@@ -217,7 +218,7 @@ def write_results_1(wb, miles, transit_miles, revenues, gains):
     ws["B43"] = revenues["transit"]["aht"]
     ws["C43"] = revenues["transit"]["pt"]
     ws["D43"] = revenues["transit"]["iht"]
-    ws = wb.get_sheet_by_name("Julkistaloudelliset")
+    ws = wb["Julkistaloudelliset"]
     ws["F8"] = revenues["car"]["aht"]
     ws["G8"] = revenues["car"]["pt"]
     ws["H8"] = revenues["car"]["iht"]
@@ -246,25 +247,25 @@ def write_gains_1(ws, gains):
 
 def write_results_2(wb, miles, transit_miles, revenues, gains):
     """Write results for year 2"""
-    ws = wb.get_sheet_by_name("ha_tyo")
+    ws = wb["ha_tyo"]
     write_gains_2(ws, gains["car_work"])
-    ws = wb.get_sheet_by_name("ha_muu")
+    ws = wb["ha_muu"]
     write_gains_2(ws, gains["car_leisure"])
-    ws = wb.get_sheet_by_name("jl_tyo")
+    ws = wb["jl_tyo"]
     write_gains_2(ws, gains["transit_work"])
-    ws = wb.get_sheet_by_name("jl_muu")
+    ws = wb["jl_muu"]
     write_gains_2(ws, gains["transit_leisure"])
-    ws = wb.get_sheet_by_name("pp_tyo")
+    ws = wb["pp_tyo"]
     write_gains_2(ws, gains["bike_work"])
-    ws = wb.get_sheet_by_name("pp_muu")
+    ws = wb["pp_muu"]
     write_gains_2(ws, gains["bike_leisure"])
-    ws = wb.get_sheet_by_name("ka")
+    ws = wb["ka"]
     write_gains_2(ws, gains["truck"])
-    ws = wb.get_sheet_by_name("yhd")
+    ws = wb["yhd"]
     write_gains_2(ws, gains["trailer_truck"])
-    ws = wb.get_sheet_by_name("pa")
+    ws = wb["pa"]
     write_gains_2(ws, gains["van"])
-    ws = wb.get_sheet_by_name("Ulkoisvaikutukset")
+    ws = wb["Ulkoisvaikutukset"]
     ws["I32"] = miles["car"][1]
     ws["J32"] = miles["car"][2]
     ws["K32"] = miles["car"][3]
@@ -285,8 +286,8 @@ def write_results_2(wb, miles, transit_miles, revenues, gains):
     ws["K35"] = miles["trailer_truck"][3]
     ws["L35"] = miles["trailer_truck"][4]
     ws["M35"] = miles["trailer_truck"][5]
-    ws = wb.get_sheet_by_name("Kayttajahyodyt")
-    ws = wb.get_sheet_by_name("Tuottajahyodyt")
+    ws = wb["Kayttajahyodyt"]
+    ws = wb["Tuottajahyodyt"]
     ws["S16"] = transit_miles["dist"]["bus"]
     ws["S17"] = transit_miles["dist"]["trunk"]
     ws["S18"] = transit_miles["dist"]["tram"]
@@ -300,7 +301,7 @@ def write_results_2(wb, miles, transit_miles, revenues, gains):
     ws["B46"] = revenues["transit"]["aht"]
     ws["C46"] = revenues["transit"]["pt"]
     ws["D46"] = revenues["transit"]["iht"]
-    ws = wb.get_sheet_by_name("Julkistaloudelliset")
+    ws = wb["Julkistaloudelliset"]
     ws["F13"] = revenues["car"]["aht"]
     ws["G13"] = revenues["car"]["pt"]
     ws["H13"] = revenues["car"]["iht"]
@@ -355,4 +356,4 @@ if __name__ == "__main__":
         os.path.basename(args.projected_scenario),
         os.path.basename(args.baseline_scenario))
     wb.save(os.path.join(args.results_path, results_filename))
-    print "CBA results saved to file: {}".format(results_filename)
+    print("CBA results saved to file: {}".format(results_filename))

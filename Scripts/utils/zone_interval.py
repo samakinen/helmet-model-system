@@ -19,10 +19,10 @@ class ZoneIntervals:
             self._intervals[name][1])
 
     def __iter__(self):
-        return self._intervals.iterkeys()
+        return iter(self._intervals.keys())
 
     def __contains__(self, item):
-        return self._intervals.has_key(item)
+        return item in self._intervals
 
     def keys(self):
         return self._intervals.keys()

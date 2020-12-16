@@ -318,14 +318,14 @@ class ModelSystem:
             nr_threads = 1
         bounds = next(iter(purpose.sources)).bounds
         split = (bounds.stop-bounds.start) // nr_threads
-        for i in xrange(0, nr_threads):
+        for i in range(0, nr_threads):
             # Take a chunk of destinations, for which this thread
             # will calculate secondary destinations
             start = bounds.start + i*split
             if i+1 < nr_threads:
-                dests = xrange(start, start + split)
+                dests = range(start, start + split)
             else:
-                dests = xrange(start, bounds.stop)
+                dests = range(start, bounds.stop)
             # Results will be saved in a temp dtm, to avoid memory clashes
             dtm = dt.DepartureTimeModel(self.ass_model.nr_zones, self.emme_scenarios)
             demand.append(dtm)

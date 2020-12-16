@@ -58,7 +58,7 @@ class Tour:
         """
         model = self.purpose.model
         probs = model.calc_individual_mode_prob(is_car_user, self.position[0])
-        self.mode = numpy.random.choice(a=self.purpose.modes, p=probs)
+        self.mode = numpy.random.choice(a=list(self.purpose.modes), p=probs)
         self.purpose.generated_tours[self.mode][self.position[0]] += 1
 
     def choose_destination(self, impedance):
