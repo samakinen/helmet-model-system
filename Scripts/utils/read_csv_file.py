@@ -26,6 +26,7 @@ def read_csv_file(data_dir, file_end, zone_numbers=None, dtype=None, squeeze=Fal
     pandas DataFrame
     """
     file_found = False
+    path=""
     for file_name in os.listdir(data_dir):
         if file_name.endswith(file_end):
             if file_found:
@@ -73,15 +74,15 @@ def read_csv_file(data_dir, file_end, zone_numbers=None, dtype=None, squeeze=Fal
                     msg = "Zone number {} from file {} not found in network".format(
                         i, path)
                     log.error(msg)
-                    raise IndexError(msg)
+                    #raise IndexError(msg)
             for i in zone_numbers:
                 if i not in data.index:
                     msg = "Zone number {} not found in file {}".format(i, path)
                     log.error(msg)
-                    raise IndexError(msg)
+                    #raise IndexError(msg)
             msg = "Zone numbers did not match for file {}".format(path)
             log.error(msg)
-            raise IndexError(msg)
+            #raise IndexError(msg)
     if dtype is not None:
         try:
             data = data.astype(dtype=dtype, errors='raise')

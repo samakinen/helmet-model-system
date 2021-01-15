@@ -97,7 +97,7 @@ destination_choice = {
             "attraction": {
                 "own_zone_area_sqrt": -1.40415965463,
                 "cbd": (0.704345842211, 0.704345842211),
-                "helsinki_other": (0.50, 0.20),
+                "capital_other": (0.50, 0.20),
             },
             "impedance": {
                 "time": -0.245629127645e-1,
@@ -232,7 +232,7 @@ destination_choice = {
         "transit": {
             "attraction": {
                 "cbd": (0.194157681759 + 0.00, 4.25838834127 + 0.00),
-                "helsinki_other": (0.00, 0.00),
+                "capital_other": (0.00, 0.00),
             },
             "impedance": {
                 "time": -0.0268255591268,

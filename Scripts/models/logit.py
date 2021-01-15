@@ -6,7 +6,6 @@ from parameters.destination_choice import destination_choice, distance_boundary
 from parameters.mode_choice import mode_choice
 from parameters.car import car_usage
 import parameters.tour_generation as generation_params
-from utils.zone_interval import ZoneIntervals
 
 
 class LogitModel:
@@ -109,13 +108,12 @@ class LogitModel:
         try: # If only one parameter
             utility += b
         except ValueError: # Separate params for cap region and surrounding
-            k = self.zone_data.first_surrounding_zone
             if utility.ndim == 1: # 1-d array calculation
-                utility[:k] += b[0]
-                utility[k:] += b[1]
+                utility[self.zone_data.capital_region_zones] += b[0]
+                utility[self.zone_data.surrounding_area_zones] += b[1]
             else: # 2-d matrix calculation
-                utility[:k, :] += b[0]
-                utility[k:, :] += b[1]
+                utility[self.zone_data.capital_region_zones, :] += b[0]
+                utility[self.zone_data.surrounding_area_zones, :] += b[1]
     
     def _add_impedance(self, utility, impedance, b):
         """Adds simple linear impedances to utility.
@@ -137,9 +135,8 @@ class LogitModel:
             try: # If only one parameter
                 utility += b[i] * impedance[i]
             except ValueError: # Separate params for cap region and surrounding
-                k = self.zone_data.first_surrounding_zone
-                utility[:k, :] += b[i][0] * impedance[i][:k, :]
-                utility[k:, :] += b[i][1] * impedance[i][k:, :]
+                utility[self.zone_data.capital_region_zones, :] += b[i][0] * impedance[i][self.zone_data.capital_region_zones, :]
+                utility[self.zone_data.surrounding_area_zones, :] += b[i][1] * impedance[i][self.zone_data.surrounding_area_zones, :]
         return utility
 
     def _add_log_impedance(self, exps, impedance, b):
@@ -167,9 +164,8 @@ class LogitModel:
             try: # If only one parameter
                 exps *= numpy.power(impedance[i] + 1, b[i])
             except ValueError: # Separate params for cap region and surrounding
-                k = self.zone_data.first_surrounding_zone
-                exps[:k, :] *= numpy.power(impedance[i][:k, :] + 1, b[i][0])
-                exps[k:, :] *= numpy.power(impedance[i][k:, :] + 1, b[i][1])
+                exps[self.zone_data.capital_region_zones, :] *= numpy.power(impedance[i][self.zone_data.capital_region_zones, :] + 1, b[i][0])
+                exps[self.zone_data.surrounding_area_zones, :] *= numpy.power(impedance[i][self.zone_data.surrounding_area_zones, :] + 1, b[i][1])
         return exps
     
     def _add_zone_util(self, utility, b, generation=False):
@@ -194,17 +190,16 @@ class LogitModel:
             try: # If only one parameter
                 utility += b[i] * zdata.get_data(i, self.bounds, generation)
             except ValueError: # Separate params for cap region and surrounding
-                k = self.zone_data.first_surrounding_zone
                 data_capital_region = zdata.get_data(
                     i, self.bounds, generation, zdata.CAPITAL_REGION)
                 data_surrounding = zdata.get_data(
                     i, self.bounds, generation, zdata.SURROUNDING_AREA)
                 if utility.ndim == 1: # 1-d array calculation
-                    utility[:k] += b[i][0] * data_capital_region
-                    utility[k:] += b[i][1] * data_surrounding
+                    utility[self.zone_data.capital_region_zones] += b[i][0] * data_capital_region
+                    utility[self.zone_data.surrounding_area_zones] += b[i][1] * data_surrounding
                 else: # 2-d matrix calculation
-                    utility[:k, :] += b[i][0] * data_capital_region
-                    utility[k:, :] += b[i][1] * data_surrounding
+                    utility[self.zone_data.capital_region_zones, :] += b[i][0] * data_capital_region
+                    utility[self.zone_data.surrounding_area_zones, :] += b[i][1] * data_surrounding
         return utility
     
     def _add_sec_zone_util(self, utility, b, orig=None, dest=None):
@@ -347,13 +342,12 @@ class ModeDestModel(LogitModel):
             Mode (car/transit/bike/walk) : numpy 2-d matrix
                 Choice probabilities
         """
-        k = self.zone_data.first_surrounding_zone
         b = self.mode_choice_param[mod_mode]["individual_dummy"][dummy]
         try:
             self.mode_exps[mod_mode] *= numpy.exp(b)
         except ValueError:
-            self.mode_exps[mod_mode][:k] *= numpy.exp(b[0])
-            self.mode_exps[mod_mode][k:] *= numpy.exp(b[1])
+            self.mode_exps[mod_mode][self.zone_data.capital_region_zones] *= numpy.exp(b[0])
+            self.mode_exps[mod_mode][self.zone_data.surrounding_area_zones] *= numpy.exp(b[1])
         mode_expsum = numpy.zeros_like(self.mode_exps[mod_mode])
         for mode in self.mode_choice_param:
             mode_expsum += self.mode_exps[mode]
@@ -387,7 +381,7 @@ class ModeDestModel(LogitModel):
                 try:
                     mode_exps[mode] *= math.exp(b["car_users"])
                 except TypeError:
-                    if zone < self.zone_data.first_surrounding_zone:
+                    if zone in self.zone_data.capital_region_zones:
                         mode_exps[mode] *= math.exp(b["car_users"][0])
                     else:
                         mode_exps[mode] *= math.exp(b["car_users"][1])
@@ -776,9 +770,15 @@ class CarUseModel(LogitModel):
         # print car use share by municipality and area
         for area_type in ("municipalities", "areas"):
             prob_area = []
-            intervals = ZoneIntervals(area_type)
-            for area in intervals:
-                i = intervals[area]
+            if area_type == "municipalities":
+                names = self.area_data["municipality"].unique().tolist()
+            else:
+                names = self.area_data.columns.drop("municipality").tolist()
+            for name in names:
+                if area_type == "municipalities":
+                    i = self.area_data[self.area_data["municipality"]==name].index.tolist()
+                else:
+                    i = self.area_data[self.area_data["name"]].index.tolist()
                 # comparison data has car user shares of population
                 # over 6 years old (from HEHA)
                 pop = population_7_99.loc[i].sum()
@@ -788,4 +788,4 @@ class CarUseModel(LogitModel):
                     prob_area.append(car_users.loc[i].sum() / pop)
             self.resultdata.print_data(
                 prob_area, "car_use_per_{}.txt".format(area_type),
-                intervals.keys(), "car_use")
+                names, "car_use")

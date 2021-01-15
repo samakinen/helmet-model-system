@@ -1,16 +1,16 @@
 {
     "LOG_LEVEL": "INFO",
     "LOG_FORMAT": "TEXT",
-    "USE_EMME": true,
+    "USE_EMME": false,
     "SAVE_MATRICES_IN_EMME": true,
     "DELETE_STRATEGY_FILES": true,
     "SCENARIO_NAME": "test",
-    "RESULTS_PATH": "C:\\XXX\\Results",
-    "EMME_PROJECT_PATH": "C:\\XXX\\xxx.emp",
+    "RESULTS_PATH": "Z:\\EMME\\Tallinn\\Results",
+    "EMME_PROJECT_PATH": "Z:\\EMME\\Tallinn\\Emme model\\Tallinn_new.emp",
     "FIRST_SCENARIO_ID": 19,
     "FIRST_MATRIX_ID": 100,
-    "BASELINE_DATA_PATH": "C:\\XXX\\Lahtodata",
-    "FORECAST_DATA_PATH": "C:\\XXX\\Ennusteskenaarioiden_syottotiedot\\2017",
-    "ITERATION_COUNT": 1,
+    "BASELINE_DATA_PATH": "Z:\\EMME\\Tallinn\\Model data",
+    "FORECAST_DATA_PATH": "Z:\\EMME\\Tallinn\\Inputs\\2020",
+    "ITERATION_COUNT": 2,
     "USE_FIXED_TRANSIT_COST": false
 }

@@ -1,9 +1,7 @@
 import numpy
 import pandas
 
-import parameters.zone as param
 from utils.read_csv_file import read_csv_file
-from utils.zone_interval import ZoneIntervals, zone_interval
 import utils.log as log
 
 
@@ -15,19 +13,17 @@ class ZoneData:
         self._values = {}
         self.share = ShareChecker(self)
         zone_numbers = numpy.array(zone_numbers)
-        surrounding = param.areas["surrounding"]
-        peripheral = param.areas["peripheral"]
-        external = param.areas["external"]
-        first_extra = numpy.where(zone_numbers > peripheral[1])[0][0]
-        idx = zone_numbers[:first_extra]
-        self.zone_numbers = idx
-        first_surrounding = numpy.where(idx >= surrounding[0])[0][0]
-        self.first_surrounding_zone = first_surrounding
-        first_peripheral = numpy.where(idx >= peripheral[0])[0][0]
+        self.area_data = read_csv_file(data_dir, ".areas", dtype= {"other_metropolitan": bool, "surrounding": bool, "capital_other": bool,"cbd_capital": bool, "peripheral": bool,"external": bool,"municipality": str})
+        self.capital_region_zones = self.area_data[(self.area_data["cbd_capital"]|self.area_data["capital_other"]|self.area_data["other_metropolitan"])].index.tolist()
+        self.surrounding_area_zones = self.area_data[(self.area_data["surrounding"]|self.area_data["peripheral"]|self.area_data["external"])].index.tolist()
+        self.zone_numbers = numpy.array(self.area_data[~self.area_data["external"]].index.tolist())
+        first_peripheral = min(self.area_data[self.area_data["peripheral"]].index.tolist())
         self.first_peripheral_zone = first_peripheral
-        first_external = numpy.where(zone_numbers >= external[0])[0][0]
-        self.first_external_zone = first_external
-        external_zones = zone_numbers[first_external:]
+        try:
+            self.first_external_zone = min(self.area_data[self.area_data["external"]].index.tolist())
+        except:
+            self.first_external_zone = None
+        external_zones = numpy.array(self.area_data[self.area_data["external"]].index.tolist())
         popdata = read_csv_file(data_dir, ".pop", self.zone_numbers, float)
         workdata = read_csv_file(data_dir, ".wrk", self.zone_numbers, float)
         schooldata = read_csv_file(data_dir, ".edu", self.zone_numbers, float)
@@ -93,14 +89,14 @@ class ZoneData:
         self["tertiary_education"] = schooldata["tertiary"]
         self["zone_area"] = landdata["builtar"]
         self.share["share_detached_houses"] = landdata["detach"]
-        self["helsinki"] = pandas.Series(0, self.zone_numbers)
-        self["helsinki"].loc[zone_interval("municipalities", "Helsinki")] = 1
-        self["cbd"] = self._area_dummy("helsinki_cbd")
-        self["helsinki_other"] = self._area_dummy("helsinki_other")
-        self["espoo_vant_kau"] = self._area_dummy("espoo_vant_kau")
-        self["surrounding"] = self._area_dummy("surrounding")
+        self["capital"] = (self.area_data["cbd_capital"]|self.area_data["capital_other"]).astype(int)
+        self["cbd"] = self.area_data["cbd_capital"].astype(int)
+        self["capital_other"] = self.area_data["capital_other"].astype(int)
+        self["other_metropolitan"] = self.area_data["other_metropolitan"].astype(int)
+        self["surrounding"] = self.area_data["surrounding"].astype(int)
         self["shops_cbd"] = self["cbd"] * self["shops"]
         self["shops_elsewhere"] = (1-self["cbd"]) * self["shops"]
+        
         # Create diagonal matrix with zone area
         di = numpy.diag_indices(self.nr_zones)
         self["own_zone"] = numpy.zeros((self.nr_zones, self.nr_zones))
@@ -109,10 +105,11 @@ class ZoneData:
         self["own_zone_area_sqrt"] = numpy.sqrt(self["own_zone_area"])
         # Create matrix where value is 1 if origin and destination is in
         # same municipality
-        home_municipality = pandas.DataFrame(0, idx, idx)
-        intervals = ZoneIntervals("municipalities")
-        for i in intervals:
-            home_municipality.loc[intervals[i], intervals[i]] = 1
+        home_municipality = pandas.DataFrame(0, self.zone_numbers, self.zone_numbers)
+        municipalities = self.area_data["municipality"].unique()
+        for i in municipalities:
+            mask = self.area_data[self.area_data["municipality"]==i].index.tolist()
+            home_municipality.loc[mask, mask] = 1
         self["population_own"] = home_municipality.values * pop.values
         self["population_other"] = (1-home_municipality.values) * pop.values
         self["workplaces_own"] = home_municipality.values * wp.values
@@ -121,11 +118,6 @@ class ZoneData:
         self["service_other"] = (1-home_municipality.values) * serv.values
         self["shops_own"] = home_municipality.values * shop.values
         self["shops_other"] = (1-home_municipality.values) * shop.values
-
-    def _area_dummy(self, name):
-        dummy = pandas.Series(0, self.zone_numbers)
-        dummy.loc[zone_interval("areas", name)] = 1
-        return dummy
 
     def __getitem__(self, key):
         return self._values[key]
@@ -217,26 +209,25 @@ class ZoneData:
         -------
         pandas Series or numpy 2-d matrix
         """
-        l = bounds.start
-        u = bounds.stop
+        zones = self.area_data.index.tolist()
         if part is not None:  # Return values for partial area only
             if part == self.CAPITAL_REGION:
-                u = self.first_surrounding_zone
+                zones = self.capital_region_zones
             else:
-                l = self.first_surrounding_zone
+                zones = self.surrounding_area_zones
         if self._values[key].ndim == 1: # If not a compound (i.e., matrix)
             if generation:  # Return values for purpose zones
-                return self._values[key][l:u].values
+                return self._values[key][zones].values
             else:  # Return values for all zones
                 return self._values[key].values
         else:  # Return matrix (purpose zones -> all zones)
-            return self._values[key][l:u, :]
+            return self._values[key][zones, :]
 
 
 class BaseZoneData(ZoneData):
     def __init__(self, data_dir, zone_numbers):
         ZoneData.__init__(self, data_dir, zone_numbers)
-        cardata = read_csv_file(data_dir, ".car", self.zone_numbers)
+        cardata = read_csv_file(data_dir, ".car")
         self["car_density"] = cardata["cardens"]
         self["cars_per_1000"] = 1000 * self["car_density"]
 

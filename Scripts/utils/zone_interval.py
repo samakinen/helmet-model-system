@@ -12,7 +12,7 @@ class ZoneIntervals:
 
     def __init__(self, division_type):
         self._intervals = param.__dict__[division_type]
-
+        
     def __getitem__(self, name):
         return slice(
             self._intervals[name][0],

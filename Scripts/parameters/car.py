@@ -36,7 +36,7 @@ car_density = {
     "constant": 0.0,
     "generation": {
         "share_detached_houses_new": 2.523e-01, # Originally estimated for percentages (0-100), here transformed
-        "helsinki": 3.782e-02,
+        "capital": 3.782e-02,
         "surrounding": 5.043e-02,
     },
     "log": {

@@ -3,7 +3,6 @@ import pandas
 import math
 
 import parameters.car as param
-from utils.zone_interval import ZoneIntervals
 
 
 class LinearModel(object):
@@ -20,6 +19,7 @@ class LinearModel(object):
         """
         self.zone_data = zone_data_forecast
         self.zone_data_base = zone_data_base
+        self.area_data = self.zone_data.area_data
         self.bounds = bounds
         self.resultdata = resultdata
 
@@ -27,9 +27,8 @@ class LinearModel(object):
         try: # If only one parameter
             prediction += b
         except ValueError: # Separate params for cap region and surrounding
-            k = self.zone_data.first_surrounding_zone
-            prediction[:k] += b[0]
-            prediction[k:] += b[1]
+            prediction[self.zone_data.capital_region_zones] += b[0]
+            prediction[self.zone_data.surrounding_area_zones] += b[1]
         return prediction
 
     def _add_zone_terms(self, prediction, b, generation=False):
@@ -38,13 +37,12 @@ class LinearModel(object):
             try: # If only one parameter
                 prediction += b[i] * zdata.get_data(i, self.bounds, generation)
             except ValueError: # Separate params for cap region and surrounding
-                k = self.zone_data.first_surrounding_zone
                 data_capital_region = zdata.get_data(
                     i, self.bounds, generation, zdata.CAPITAL_REGION)
                 data_surrounding = zdata.get_data(
                     i, self.bounds, generation, zdata.SURROUNDING_AREA)
-                prediction[:k] += b[i][0] * data_capital_region
-                prediction[k:] += b[i][1] * data_surrounding
+                prediction[self.zone_data.capital_region_zones] += b[i][0] * data_capital_region
+                prediction[self.zone_data.surrounding_area_zones] += b[i][1] * data_surrounding
         return prediction
 
     def _add_log_zone_terms(self, prediction, b, generation=False):
@@ -138,9 +136,15 @@ class CarDensityModel(LinearModel):
         # print car density by municipality and area
         for area_type in ("municipalities", "areas"):
             aggregation = []
-            intervals = ZoneIntervals(area_type)
-            for area in intervals:
-                i = intervals[area]
+            if area_type == "municipalities":
+                names = self.area_data["municipality"].unique().tolist()
+            else:
+                names = self.area_data.columns.drop("municipality").tolist()
+            for name in names:
+                if area_type == "municipalities":
+                    i = self.area_data[self.area_data["municipality"]==name].index.tolist()
+                else:
+                    i = self.area_data[self.area_data["name"]].index.tolist()
                 w = population.loc[i]
                 if w.size == 0 or w.sum() == 0:
                     aggregation.append(0)
@@ -149,4 +153,4 @@ class CarDensityModel(LinearModel):
                         car_density.loc[i], weights=w))
             self.resultdata.print_data(
                 aggregation, "car_density_per_{}.txt".format(area_type),
-                intervals.keys(), "car_density")
+                names, "car_density")

@@ -4,6 +4,7 @@
 import os
 import logging
 import numpy
+from utils.config import Config
 
 import assignment.emme_assignment as ass
 from datahandling.zonedata import ZoneData
@@ -17,10 +18,8 @@ class EmmeAssignmentTest:
                             datefmt='%Y-%m-%d %H:%M:%S',
                             level=logging.INFO)
         script_dir = os.path.dirname(os.path.realpath('__file__'))
-        project_dir = os.path.join(script_dir, "..")
-        for file_name in os.listdir(project_dir):
-            if file_name.endswith(".emp"):
-                empfile = os.path.join(project_dir, file_name)
+        config = Config().read_from_file()
+        empfile = config.EMME_PROJECT_PATH
         emme_context = EmmeProject(empfile)
         self.ass_model = ass.EmmeAssignmentModel(emme_context, 19)
         self.ass_model.prepare_network()

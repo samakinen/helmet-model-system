@@ -1,5 +1,11 @@
 ### DEMAND MODEL REFERENCES ###
 
+from utils.read_csv_file import read_csv_file
+
+class Parameters:
+    def __init__(self, data_dir):
+        self.area_data = read_csv_file(data_dir, ".areas", self.zone_numbers, dtype= {"other_metropolitan": bool, "surrounding": bool, "capital_other": bool,"cbd_capital": bool, "peripheral": bool,"external": bool,"municipality": str})
+
 tour_purposes = (
     {
         "name": "hw",

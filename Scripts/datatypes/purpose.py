@@ -5,7 +5,6 @@ from parameters.destination_choice import secondary_destination_threshold
 import models.logit as logit
 import models.generation as generation
 from datatypes.demand import Demand
-from utils.zone_interval import zone_interval
 
 
 class Purpose:
@@ -48,6 +47,7 @@ class Purpose:
             u = None
         self.bounds = slice(l, u)
         self.zone_data = zone_data
+        self.area_data = self.zone_data.area_data
         self.generated_tours = {}
         self.attracted_tours = {}
 
@@ -171,19 +171,19 @@ class TourPurpose(Purpose):
         orig = self.zone_numbers
         mtx = pandas.DataFrame(mtx, orig, dest)
         areas = (
-            "helsinki_cbd",
-            "helsinki_other",
-            "espoo_vant_kau",
+            "cbd_capital",
+            "capital_other",
+            "other_metropolitan",
             "surrounding",
             "peripheral",
         )
         aggr_mtx = pandas.DataFrame(0, areas, areas)
         tmp_mtx = pandas.DataFrame(0, areas, dest)
         for area in areas:
-            i = zone_interval("areas", area)
+            i = self.area_data[self.area_data[area]].index.tolist()
             tmp_mtx.loc[area] = mtx.loc[i].sum(0).values
         for area in areas:
-            i = zone_interval("areas", area)
+            i = self.area_data[self.area_data[area]].index.tolist()
             aggr_mtx.loc[:, area] = tmp_mtx.loc[:, i].sum(1).values
         return aggr_mtx
 

@@ -6,7 +6,6 @@ from contextlib import contextmanager
 
 import utils.log as log
 from utils.read_csv_file import read_csv_file
-from utils.zone_interval import zone_interval
 import parameters.assignment as param
 
 
@@ -35,9 +34,9 @@ class MatrixData:
                 0, zonedata.zone_numbers[zonedata.first_peripheral_zone:],
                 zonedata.zone_numbers)
             for periph_municipality in aggr_mtx.index:
-                i = zone_interval("municipalities", periph_municipality)
+                i = zonedata.area_data[zonedata.area_data["municipality"]==periph_municipality].index.tolist()
                 for municipality in aggr_mtx.columns:
-                    j = zone_interval("municipalities", municipality)
+                    j = zonedata.area_data[zonedata.area_data["municipality"]==municipality].index.tolist()
                     mtx.loc[i, j] = aggr_mtx.loc[periph_municipality, municipality]
             return mtx.values
         except NameError:
@@ -68,7 +67,7 @@ class MatrixFile(object):
                         msg = "Zone number {} from file {} not found in network".format(
                             i, path)
                         log.error(msg)
-                        raise IndexError(msg)
+                        #raise IndexError(msg)
                 for i in zone_numbers:
                     if i not in mtx_numbers:
                         self.missing_zones.append(i)
@@ -85,7 +84,7 @@ class MatrixFile(object):
                     msg = "File {} does not contain {} matrix.".format(
                         path, ass_class)
                     log.error(msg)
-                    raise IndexError(msg)
+                    #raise IndexError(msg)
         else:
             self.mapping = zone_numbers
     
