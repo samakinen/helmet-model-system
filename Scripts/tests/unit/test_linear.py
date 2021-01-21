@@ -1,7 +1,6 @@
 import numpy
 import pandas
 import unittest
-import parameters
 from datahandling.zonedata import BaseZoneData
 from models.linear import CarDensityModel
 from datahandling.resultdata import ResultsData
@@ -27,8 +26,7 @@ class LinearModelTest(unittest.TestCase):
         mtx[numpy.diag_indices(4)] = 0
         pur.bounds = slice(0, 4)
         pur.zone_numbers = (5, 6, 7, 2792)
-        bounds = slice(0, zd.nr_zones)
-        model = CarDensityModel(zd, zd, bounds, resultdata)
+        model = CarDensityModel(zd, zd, resultdata)
         prediction = model.predict()
         zd["car_density"] = prediction
         self._validate(prediction)

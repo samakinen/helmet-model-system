@@ -652,6 +652,7 @@ class CarUseModel(LogitModel):
     def __init__(self, zone_data, bounds, age_groups, resultdata):
         self.resultdata = resultdata
         self.zone_data = zone_data
+        self.area_data = self.zone_data.area_data
         self.bounds = bounds
         self.genders = ("female", "male")
         self.age_groups = age_groups
@@ -681,7 +682,7 @@ class CarUseModel(LogitModel):
                 Choice probabilities
         """
         b = self.param
-        utility = numpy.zeros(self.bounds.stop)
+        utility = numpy.zeros(max(self.zone_data.area_data.loc[self.bounds].index.tolist()))
         self._add_constant(utility, b["constant"])
         self._add_zone_util(utility, b["generation"], True)
         self.exps = numpy.exp(utility)
@@ -718,7 +719,7 @@ class CarUseModel(LogitModel):
         no_dummy_prob = no_dummy_share * prob
         prob = no_dummy_prob + dummy_prob
         prob = pandas.Series(
-            prob, self.zone_data.zone_numbers[self.bounds])
+            prob, numpy.array(self.zone_data.area_data.loc[self.bounds].index))
         self.print_results(prob)
         return prob
     
@@ -764,7 +765,7 @@ class CarUseModel(LogitModel):
                 
         # Print car user share by zone
         self.resultdata.print_data(
-            prob, "car_use.txt", self.zone_data.zone_numbers[self.bounds],
+            prob, "car_use.txt", numpy.array(self.zone_data.area_data.loc[self.bounds].index),
             "car_use")
                           
         # print car use share by municipality and area
@@ -778,7 +779,7 @@ class CarUseModel(LogitModel):
                 if area_type == "municipalities":
                     i = self.area_data[self.area_data["municipality"]==name].index.tolist()
                 else:
-                    i = self.area_data[self.area_data["name"]].index.tolist()
+                    i = self.area_data[self.area_data[name]].index.tolist()
                 # comparison data has car user shares of population
                 # over 6 years old (from HEHA)
                 pop = population_7_99.loc[i].sum()

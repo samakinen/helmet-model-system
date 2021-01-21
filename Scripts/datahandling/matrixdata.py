@@ -18,6 +18,20 @@ class MatrixData:
     @contextmanager
     def open(self, mtx_type, time_period, zone_numbers=None, m='r'):
         file_name = os.path.join(self.path, mtx_type+'_'+time_period+".omx")
+        if not zone_numbers is None:
+            omx_file = omx.open_file(file_name,'a')
+            for name in omx_file.list_matrices():
+                old_numbers = omx_file.map_entries("zone_number")
+                old = pandas.DataFrame(omx_file[name],old_numbers,old_numbers)
+                new = old[zone_numbers].to_numpy(dtype=float)
+                omx_file.remove_node("/data",name)
+                omx_file[name]=new
+            try:
+                omx_file.create_mapping('zone_number', zone_numbers)
+            except:
+                omx_file.delete_mapping('zone_number')
+                omx_file.create_mapping('zone_number', zone_numbers)
+            omx_file.close()
         mtxfile = MatrixFile(omx.open_file(file_name, m), zone_numbers)
         yield mtxfile
         mtxfile.close()
@@ -67,7 +81,7 @@ class MatrixFile(object):
                         msg = "Zone number {} from file {} not found in network".format(
                             i, path)
                         log.error(msg)
-                        #raise IndexError(msg)
+                        raise IndexError(msg)
                 for i in zone_numbers:
                     if i not in mtx_numbers:
                         self.missing_zones.append(i)
@@ -84,7 +98,7 @@ class MatrixFile(object):
                     msg = "File {} does not contain {} matrix.".format(
                         path, ass_class)
                     log.error(msg)
-                    #raise IndexError(msg)
+                    raise IndexError(msg)
         else:
             self.mapping = zone_numbers
     

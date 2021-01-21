@@ -18,9 +18,9 @@ class ZoneData:
         self.surrounding_area_zones = self.area_data[(self.area_data["surrounding"]|self.area_data["peripheral"]|self.area_data["external"])].index.tolist()
         self.zone_numbers = numpy.array(self.area_data[~self.area_data["external"]].index.tolist())
         first_peripheral = min(self.area_data[self.area_data["peripheral"]].index.tolist())
-        self.first_peripheral_zone = first_peripheral
+        self.first_peripheral_zone = first_peripheral - 1
         try:
-            self.first_external_zone = min(self.area_data[self.area_data["external"]].index.tolist())
+            self.first_external_zone = min(self.area_data[self.area_data["external"]].index.tolist()) - 1 
         except:
             self.first_external_zone = None
         external_zones = numpy.array(self.area_data[self.area_data["external"]].index.tolist())
@@ -31,6 +31,7 @@ class ZoneData:
         parkdata = read_csv_file(data_dir, ".prk", self.zone_numbers, float)
         self.externalgrowth = read_csv_file(data_dir, ".ext", external_zones, float)
         transit = read_csv_file(data_dir, ".tco")
+        self.area_data = self.area_data[~self.area_data["external"]]
         try:
             transit["fare"] = transit["fare"].astype(dtype=float, errors='raise')
         except ValueError:
@@ -190,7 +191,7 @@ class ZoneData:
         data = {k: self._values[k] for k in freight_variables}
         return pandas.DataFrame(data)
 
-    def get_data(self, key, bounds, generation=False, part=None):
+    def get_data(self, key, bounds=None, generation=False, part=None):
         """Get data of correct shape for zones included in purpose.
         
         Parameters
@@ -209,7 +210,10 @@ class ZoneData:
         -------
         pandas Series or numpy 2-d matrix
         """
-        zones = self.area_data.index.tolist()
+        if bounds is None:
+            zones = self.area_data.index.tolist()
+        else:
+            zones = self.area_data.loc[bounds].index.tolist()
         if part is not None:  # Return values for partial area only
             if part == self.CAPITAL_REGION:
                 zones = self.capital_region_zones

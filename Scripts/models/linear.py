@@ -6,7 +6,7 @@ import parameters.car as param
 
 
 class LinearModel(object):
-    def __init__(self, zone_data_base, zone_data_forecast, bounds, resultdata):
+    def __init__(self, zone_data_base, zone_data_forecast, resultdata):
         """Initialize a linear model.
 
         Parameters
@@ -20,7 +20,6 @@ class LinearModel(object):
         self.zone_data = zone_data_forecast
         self.zone_data_base = zone_data_base
         self.area_data = self.zone_data.area_data
-        self.bounds = bounds
         self.resultdata = resultdata
 
     def _add_constant(self, prediction, b):
@@ -35,12 +34,12 @@ class LinearModel(object):
         zdata = self.zone_data
         for i in b:
             try: # If only one parameter
-                prediction += b[i] * zdata.get_data(i, self.bounds, generation)
+                prediction += b[i] * zdata.get_data(i, None, generation)
             except ValueError: # Separate params for cap region and surrounding
                 data_capital_region = zdata.get_data(
-                    i, self.bounds, generation, zdata.CAPITAL_REGION)
+                    i, None, generation, zdata.CAPITAL_REGION)
                 data_surrounding = zdata.get_data(
-                    i, self.bounds, generation, zdata.SURROUNDING_AREA)
+                    i, None, generation, zdata.SURROUNDING_AREA)
                 prediction[self.zone_data.capital_region_zones] += b[i][0] * data_capital_region
                 prediction[self.zone_data.surrounding_area_zones] += b[i][1] * data_surrounding
         return prediction
@@ -48,13 +47,12 @@ class LinearModel(object):
     def _add_log_zone_terms(self, prediction, b, generation=False):
         zdata = self.zone_data
         for i in b:
-            prediction += b[i] * numpy.log(zdata.get_data(i, self.bounds,
-                generation))
+            prediction += b[i] * numpy.log(zdata.get_data(i, None, generation))
         return prediction
 
 
 class CarDensityModel(LinearModel):
-    def __init__(self, zone_data_base, zone_data_forecast, bounds, resultdata):
+    def __init__(self, zone_data_base, zone_data_forecast, resultdata):
         """Initialize a car density model.
 
         Population growth and share of new dwellings that are detached houses
@@ -69,7 +67,7 @@ class CarDensityModel(LinearModel):
             metropolitan area).
         """
         LinearModel.__init__(
-            self, zone_data_base, zone_data_forecast, bounds, resultdata)
+            self, zone_data_base, zone_data_forecast, resultdata)
         base_pop = self.zone_data_base["population"]
         forecast_pop = self.zone_data["population"]
         # Car ownership model is applied only for population growth
@@ -89,7 +87,7 @@ class CarDensityModel(LinearModel):
             detached_houses_diff, pop_growth,
             out=numpy.array(forecast_sh_detached), where=pop_growth!=0)
         self.zone_data._values["share_detached_houses_new"] = pandas.Series(
-            share_detached_new, self.zone_data.zone_numbers[self.bounds])
+            share_detached_new, self.zone_data.zone_numbers)
     
     def predict(self):
         """Get car ownership prediction for zones.
@@ -99,7 +97,7 @@ class CarDensityModel(LinearModel):
         pandas.Series
             Zone vector of cars per inhabitant
         """
-        prediction = pandas.Series(0.0, self.zone_data.zone_numbers[self.bounds])
+        prediction = pandas.Series(0.0, self.zone_data.zone_numbers)
         b = param.car_density
         self._add_constant(prediction, b["constant"])
         self._add_zone_terms(prediction, b["generation"], True)
@@ -131,7 +129,7 @@ class CarDensityModel(LinearModel):
         # Print car density by zone
         self.resultdata.print_data(
             prediction, "car_density.txt",
-            self.zone_data.zone_numbers[self.bounds], "car_density")
+            self.zone_data.zone_numbers, "car_density")
         
         # print car density by municipality and area
         for area_type in ("municipalities", "areas"):
@@ -144,7 +142,7 @@ class CarDensityModel(LinearModel):
                 if area_type == "municipalities":
                     i = self.area_data[self.area_data["municipality"]==name].index.tolist()
                 else:
-                    i = self.area_data[self.area_data["name"]].index.tolist()
+                    i = self.area_data[self.area_data[name]].index.tolist()
                 w = population.loc[i]
                 if w.size == 0 or w.sum() == 0:
                     aggregation.append(0)

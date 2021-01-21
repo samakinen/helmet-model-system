@@ -69,7 +69,7 @@ class ModelSystem:
         self.imptrans = ImpedanceTransformer()
         bounds = slice(0, self.zdata_forecast.nr_zones)
         self.cdm = CarDensityModel(
-            self.zdata_base, self.zdata_forecast, bounds, self.resultdata)
+            self.zdata_base, self.zdata_forecast, self.resultdata)
         self.mode_share = []
         self.trucks = self.fm.calc_freight_traffic("truck")
         self.trailer_trucks = self.fm.calc_freight_traffic("trailer_truck")

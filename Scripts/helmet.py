@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 import sys
 import os
 from glob import glob
+import openmatrix as omx
 
 from utils.config import Config
 import utils.log as log
@@ -33,6 +34,7 @@ def main(args):
 
     # Read input matrices (.omx) and zonedata (.csv), and initialize models (assignment model and model-system)
     log.info("Initializing matrices and models..", extra=log_extra)
+
     # Check input data folders/files exist
     if not os.path.exists(base_zonedata_path):
         raise NameError("Baseline zonedata directory '{}' does not exist.".format(base_zonedata_path))

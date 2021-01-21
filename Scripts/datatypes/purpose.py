@@ -53,7 +53,7 @@ class Purpose:
 
     @property
     def zone_numbers(self):
-        return self.zone_data.zone_numbers[self.bounds]
+        return numpy.array(self.area_data.loc[self.bounds].index)
 
 
 class TourPurpose(Purpose):
@@ -148,7 +148,7 @@ class TourPurpose(Purpose):
             self.resultdata.print_matrix(
                 aggregated_demand, "aggregated_demand",
                 "{}_{}".format(self.name, mode))
-            own_zone = self.zone_data.get_data("own_zone", self.bounds)
+            own_zone = self.zone_data.get_data("own_zone",self.bounds)
             own_zone_demand = own_zone * mtx
             own_zone_aggregated = self._aggregate(own_zone_demand)
             self.resultdata.print_data(
