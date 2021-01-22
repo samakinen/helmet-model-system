@@ -23,8 +23,8 @@ mode_choice = {
                          0.830938747727 * (3.35324641782 - 0.527)),
             "generation": {
                 "cbd": 0.40,
-                "helsinki_other": -0.10,
-                "espoo_vant_kau": -0.30,
+                "capital_other": -0.10,
+                "other_metropolitan": -0.30,
             },
             "attraction": {},
             "impedance": {},
@@ -75,8 +75,8 @@ mode_choice = {
                          0.272803753976 * (13.2817160786 - 0.734)),
             "generation": {
                 "cbd": 0.3,
-                "helsinki_other": 0.3,
-                "espoo_vant_kau": -0.3,
+                "capital_other": 0.3,
+                "other_metropolitan": -0.3,
             },
             "attraction": {},
             "impedance": {},
@@ -125,8 +125,8 @@ mode_choice = {
             "constant": (3.12509878421 + 0.053, 3.12509878421 + 0.468),
             "generation": {
                 "cbd": 0.5,
-                "helsinki_other": 0.1,
-                "espoo_vant_kau": -0.7,
+                "capital_other": 0.1,
+                "other_metropolitan": -0.7,
             },
             "attraction": {},
             "impedance": {},
@@ -176,7 +176,7 @@ mode_choice = {
             "constant": (0.522036062262 * (6.72180796903 + 0.158), 
                          0.522036062262 * (6.67197643351 - 0.399)),
             "generation": {
-                "espoo_vant_kau": -0.3,
+                "other_metropolitan": -0.3,
             },
             "attraction": {},
             "impedance": {},
@@ -229,7 +229,7 @@ mode_choice = {
                          0.157371648547 * (-9.21721208402 - 0.258)),
             "generation": {
                 "cbd": 0.2,
-                "espoo_vant_kau": -0.8,
+                "other_metropolitan": -0.8,
             },
             "attraction": {},
             "impedance": {},
@@ -281,8 +281,8 @@ mode_choice = {
                          .718153936654 * (1.47963675807 - 3.635)),
             "generation": {
                 "cbd": 0.9,
-                "helsinki_other": -0.1,
-                "espoo_vant_kau": -0.9,
+                "capital_other": -0.1,
+                "other_metropolitan": -0.9,
             },
             "attraction": {},
             "impedance": {},
@@ -333,8 +333,8 @@ mode_choice = {
                          .718153936654 * (1.47963675807 + 0.242)),
             "generation": {
                 "cbd": 0.2,
-                "helsinki_other": -0.4,
-                "espoo_vant_kau": -0.4,
+                "capital_other": -0.4,
+                "other_metropolitan": -0.4,
             },
             "attraction": {},
             "impedance": {},

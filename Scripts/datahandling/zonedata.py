@@ -93,11 +93,11 @@ class ZoneData:
         self["tertiary_education"] = schooldata["tertiary"]
         self["zone_area"] = landdata["builtar"]
         self.share["share_detached_houses"] = landdata["detach"]
-        self["helsinki"] = pandas.Series(0, self.zone_numbers)
-        self["helsinki"].loc[zone_interval("municipalities", "Helsinki")] = 1
-        self["cbd"] = self._area_dummy("helsinki_cbd")
-        self["helsinki_other"] = self._area_dummy("helsinki_other")
-        self["espoo_vant_kau"] = self._area_dummy("espoo_vant_kau")
+        self["capital"] = pandas.Series(0, self.zone_numbers)
+        self["capital"].loc[slice(zone_interval("areas", "cbd_capital").start, zone_interval("areas", "capital_other").stop)] = 1
+        self["cbd"] = self._area_dummy("cbd_capital")
+        self["capital_other"] = self._area_dummy("capital_other")
+        self["other_metropolitan"] = self._area_dummy("other_metropolitan")
         self["surrounding"] = self._area_dummy("surrounding")
         self["shops_cbd"] = self["cbd"] * self["shops"]
         self["shops_elsewhere"] = (1-self["cbd"]) * self["shops"]

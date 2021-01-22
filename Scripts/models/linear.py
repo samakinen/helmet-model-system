@@ -145,8 +145,11 @@ class CarDensityModel(LinearModel):
                 if w.size == 0 or w.sum() == 0:
                     aggregation.append(0)
                 else:
-                    aggregation.append(numpy.average(
-                        car_density.loc[i], weights=w))
+                    try:
+                        aggregation.append(numpy.average(
+                            car_density.loc[i], weights=w))
+                    except:
+                        print(i,w)
             self.resultdata.print_data(
                 aggregation, "car_density_per_{}.txt".format(area_type),
                 intervals.keys(), "car_density")

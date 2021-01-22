@@ -171,9 +171,9 @@ class TourPurpose(Purpose):
         orig = self.zone_numbers
         mtx = pandas.DataFrame(mtx, orig, dest)
         areas = (
-            "helsinki_cbd",
-            "helsinki_other",
-            "espoo_vant_kau",
+            "cbd_capital",
+            "capital_other",
+            "other_metropolitan",
             "surrounding",
             "peripheral",
         )
